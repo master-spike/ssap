@@ -3,11 +3,9 @@
 #include <functional>
 #include <string>
 
-namespace ssap
-{
+namespace ssap {
 
-class participant
-{
+class participant {
 public:
 private:
     std::function<int(std::string, std::string)> f_whisper;

@@ -2,8 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("keymanager")
-{
+TEST_CASE("keymanager") {
     using ssap::crypto::keymanager;
     auto key_id = keymanager::get_instance().generate_key();
 

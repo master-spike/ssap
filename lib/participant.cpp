@@ -1,6 +1,3 @@
 #include "participant.hpp"
 
-namespace ssap
-{
-
-}
+namespace ssap {}
