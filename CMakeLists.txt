@@ -5,10 +5,11 @@ project(ssap)
 find_package(Catch2 3 REQUIRED)
 find_package(OpenSSL REQUIRED)
 
-set(SSAP_OBJS
-    participant)
+set(SSAP_CXX_FILES
+    lib/participant.cpp
+    lib/crypto/keymanager.cpp)
 
-add_library(ssap "lib/${SSAP_OBJS}.cpp")
+add_library(ssap ${SSAP_CXX_FILES})
 target_include_directories(ssap PUBLIC include/ssap)
 target_include_directories(ssap PRIVATE lib)
 
