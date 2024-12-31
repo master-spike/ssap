@@ -1,0 +1,34 @@
+1.  Each participant 1..N generates a temporary private/public key-pair for the
+    secret santa allocation, and a secret number.
+
+2.  Participant N generates another key-pair and broadcasts the public key to
+    each other participant. Each participant broadcasts the sha-256 hash of
+    their secret number.
+
+3.  Starting from participant 1, participants n : (1..N-1) generates a message
+    M encrypting their own public key with N's public key, passing the message
+    to the next participant. The next participant appends their own encrypted
+    public key to the message, and shuffles the public keys before passing it
+    to the next participant.
+
+4.  When participant N receives the message M, they decrypt each key in the
+    list, append their own unencrypted public key, then reshuffle it.
+
+5.  Participant N broadcasts the decryped anonymized list to each participant,
+    and each participant broadcasts their secret number, which the other
+    participants can verify wasn't changed by comparing the sha-256.
+
+6.  The participants xor all the initially-secret numbers together to produce
+    the seed for a deterministic pseudorandom permutaton generator, and permute
+    the list according to the generated random permutaton. The result is a
+    tamper-proof, anonymized randomly-ordered list of everyone's SSK public
+    keys which we will call L.
+
+7.  Each participant looks at the permuted list L and identifies their giver
+    key G as the public key that appears after their own in the list. Each
+    participant broadcasts their signed identity encrypted with G.
+
+8.  Each participant then looks at their receipts and attempts to decrypt each
+    receipt with their SSK private key. On success, they receive their target,
+    and verify their signature.
+
