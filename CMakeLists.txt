@@ -16,7 +16,8 @@ target_include_directories(ssap PRIVATE lib)
 set_property(TARGET ssap PROPERTY CXX_STANDARD 20)
 
 set(SSAP_TESTS
-    crypto/keymanager_test)
+    crypto/keymanager_test
+    crypto/cipher_test)
 
 include(CTest)
 include(Catch)

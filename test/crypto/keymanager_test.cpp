@@ -13,7 +13,7 @@ TEST_CASE("keymanager") {
     REQUIRE(key.has_value());
     REQUIRE(key.value().get() != nullptr);
 
-    std::unique_ptr<EVP_PKEY_CTX, void (*)(EVP_PKEY_CTX *)> ctx(
+    std::unique_ptr<EVP_PKEY_CTX, void (*)(EVP_PKEY_CTX*)> ctx(
         EVP_PKEY_CTX_new_from_pkey(nullptr, key.value().get(), nullptr),
         EVP_PKEY_CTX_free);
     REQUIRE(EVP_PKEY_public_check(ctx.get()));
