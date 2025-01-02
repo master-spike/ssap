@@ -1,5 +1,6 @@
 #include "keymanager.hpp"
 
+#define OPENSSL_NO_DEPRECATED
 #include "openssl/rsa.h"
 
 namespace ssap::crypto {

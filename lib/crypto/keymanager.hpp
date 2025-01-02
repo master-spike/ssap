@@ -5,6 +5,7 @@
 #include <optional>
 #include <unordered_map>
 
+#define OPENSSL_NO_DEPRECATED
 #include "openssl/evp.h"
 
 namespace ssap::crypto {

@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#define OPENSSL_NO_DEPRECATED
+
 #include <openssl/types.h>
 
 // OpenSSL forward declarations

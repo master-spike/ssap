@@ -8,6 +8,7 @@
 #include <string_view>
 #include <vector>
 
+#define OPENSSL_NO_DEPRECATED
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
