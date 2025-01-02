@@ -1,9 +1,10 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 
 #define OPENSSL_NO_DEPRECATED
-
+#include <openssl/crypto.h>
 #include <openssl/types.h>
 
 // OpenSSL forward declarations
@@ -40,5 +41,30 @@ using ossl_unique_ptr = std::unique_ptr<OpenSSLType, deleter_for<OpenSSLType>>;
 #define MAKE_OSSL_UNIQUE_PTR(type, name, ptr)                                  \
     ::ssap::crypto::ossl_unique_ptr<type> name(                                \
         ptr, ::ssap::crypto::deleter_for<type>{})
+
+template <typename T>
+class ossl_allocator {
+    static_assert(
+        std::is_same_v<T, std::remove_cvref_t<T>>,
+        "T is not a cv-unqualified object type");
+
+public:
+    using pointer = T*;
+    using const_pointer = const T*;
+    using void_pointer = void*;
+    using const_void_pointer = const void*;
+    using value_type = T;
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
+
+    constexpr pointer allocate(size_type n) {
+        void_pointer p = OPENSSL_malloc(n * sizeof(T));
+        return reinterpret_cast<pointer>(p);
+    }
+
+    constexpr void deallocate(pointer p, [[maybe_unused]] size_type n) {
+        OPENSSL_free(p);
+    }
+};
 
 } // namespace ssap::crypto

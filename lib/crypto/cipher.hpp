@@ -17,7 +17,7 @@ namespace ssap::crypto {
 
 static constexpr size_t kOAEPPaddingBytes = 42;
 
-std::optional<std::vector<uint8_t>> rsa_encrypt_block(
+std::optional<std::vector<uint8_t, ossl_allocator<uint8_t>>> rsa_encrypt_block(
     const uint8_t* in, size_t in_len, EVP_PKEY* key) {
 
     size_t max_input_length = EVP_PKEY_get_size(key) - kOAEPPaddingBytes;
@@ -46,7 +46,7 @@ std::optional<std::vector<uint8_t>> rsa_encrypt_block(
         return std::nullopt;
     }
 
-    std::vector<uint8_t> out(out_len, '\0');
+    std::vector<uint8_t, ossl_allocator<uint8_t>> out(out_len, '\0');
 
     if (EVP_PKEY_encrypt(ctx.get(), out.data(), &out_len, in, in_len) <= 0) {
         ERR_print_errors_fp(stderr);
@@ -60,7 +60,7 @@ std::optional<std::vector<uint8_t>> rsa_encrypt_block(
     return out;
 }
 
-std::optional<std::vector<uint8_t>> rsa_decrypt_block(
+std::optional<std::vector<uint8_t, ossl_allocator<uint8_t>>> rsa_decrypt_block(
     const uint8_t* in, size_t in_len, EVP_PKEY* key) {
 
     size_t max_input_length = EVP_PKEY_get_size(key);
@@ -88,7 +88,7 @@ std::optional<std::vector<uint8_t>> rsa_decrypt_block(
         return std::nullopt;
     }
 
-    std::vector<uint8_t> out(out_len, '\0');
+    std::vector<uint8_t, ossl_allocator<uint8_t>> out(out_len, '\0');
 
     if (EVP_PKEY_decrypt(ctx.get(), out.data(), &out_len, in, in_len) <= 0) {
         ERR_print_errors_fp(stderr);
