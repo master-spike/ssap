@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -17,11 +18,23 @@ namespace ssap::crypto {
 
 static constexpr size_t kOAEPPaddingBytes = 42;
 
+template <typename T>
+std::span<const uint8_t> as_u8s(std::span<const T> in) {
+    auto size = in.size_bytes();
+    std::span<const uint8_t> out(
+        reinterpret_cast<const uint8_t*>(in.data()), size);
+
+    return out;
+}
+
+template <typename T>
 std::optional<std::vector<uint8_t, ossl_allocator<uint8_t>>> rsa_encrypt_block(
-    const uint8_t* in, size_t in_len, EVP_PKEY* key) {
+    std::span<const T> input, EVP_PKEY* key) {
+
+    std::span<const uint8_t> in = as_u8s<T>(input);
 
     size_t max_input_length = EVP_PKEY_get_size(key) - kOAEPPaddingBytes;
-    if (max_input_length < in_len) {
+    if (max_input_length < in.size()) {
         return std::nullopt;
     }
 
@@ -41,14 +54,18 @@ std::optional<std::vector<uint8_t, ossl_allocator<uint8_t>>> rsa_encrypt_block(
 
     size_t out_len = 0;
 
-    if (EVP_PKEY_encrypt(ctx.get(), nullptr, &out_len, in, in_len) <= 0) {
+    if (EVP_PKEY_encrypt(ctx.get(), nullptr, &out_len, in.data(), in.size()) <=
+        0)
+    {
         ERR_print_errors_fp(stderr);
         return std::nullopt;
     }
 
     std::vector<uint8_t, ossl_allocator<uint8_t>> out(out_len, '\0');
 
-    if (EVP_PKEY_encrypt(ctx.get(), out.data(), &out_len, in, in_len) <= 0) {
+    if (EVP_PKEY_encrypt(
+            ctx.get(), out.data(), &out_len, in.data(), in.size()) <= 0)
+    {
         ERR_print_errors_fp(stderr);
         return std::nullopt;
     }
@@ -60,11 +77,11 @@ std::optional<std::vector<uint8_t, ossl_allocator<uint8_t>>> rsa_encrypt_block(
     return out;
 }
 
-std::optional<std::vector<uint8_t, ossl_allocator<uint8_t>>> rsa_decrypt_block(
-    const uint8_t* in, size_t in_len, EVP_PKEY* key) {
+inline std::optional<std::vector<uint8_t, ossl_allocator<uint8_t>>>
+rsa_decrypt_block(std::span<const uint8_t> in, EVP_PKEY* key) {
 
     size_t max_input_length = EVP_PKEY_get_size(key);
-    if (max_input_length < in_len)
+    if (max_input_length < in.size())
         return std::nullopt;
 
     MAKE_OSSL_UNIQUE_PTR(EVP_PKEY_CTX, ctx, EVP_PKEY_CTX_new(key, nullptr));
@@ -83,14 +100,18 @@ std::optional<std::vector<uint8_t, ossl_allocator<uint8_t>>> rsa_decrypt_block(
 
     size_t out_len = 0;
 
-    if (EVP_PKEY_decrypt(ctx.get(), nullptr, &out_len, in, in_len) <= 0) {
+    if (EVP_PKEY_decrypt(ctx.get(), nullptr, &out_len, in.data(), in.size()) <=
+        0)
+    {
         ERR_print_errors_fp(stderr);
         return std::nullopt;
     }
 
     std::vector<uint8_t, ossl_allocator<uint8_t>> out(out_len, '\0');
 
-    if (EVP_PKEY_decrypt(ctx.get(), out.data(), &out_len, in, in_len) <= 0) {
+    if (EVP_PKEY_decrypt(
+            ctx.get(), out.data(), &out_len, in.data(), in.size()) <= 0)
+    {
         ERR_print_errors_fp(stderr);
         return std::nullopt;
     }

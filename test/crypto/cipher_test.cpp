@@ -1,6 +1,6 @@
 #include "crypto/cipher.hpp"
 
-#include <iostream>
+#include <span>
 
 #include <catch2/catch_test_macros.hpp>
 #include <openssl/evp.h>
@@ -22,9 +22,8 @@ TEST_CASE("rsa encrypt-decrypt block") {
     REQUIRE(EVP_PKEY_public_check(check_ctx.get()));
     REQUIRE(EVP_PKEY_private_check(check_ctx.get()));
 
-    auto r = ssap::crypto::rsa_encrypt_block(
-        reinterpret_cast<uint8_t*>(sample_str.data()), sample_str.size(),
-        pkey.get());
+    auto r = ssap::crypto::rsa_encrypt_block<char>(
+        std::span<char>(sample_str.begin(), sample_str.end()), pkey.get());
 
     REQUIRE(r.has_value());
     REQUIRE(r.value().size() > 0);
@@ -32,7 +31,8 @@ TEST_CASE("rsa encrypt-decrypt block") {
     INFO("encrypted size : " << r.value().size());
 
     auto s = ssap::crypto::rsa_decrypt_block(
-        r.value().data(), r.value().size(), pkey.get());
+        std::span<const uint8_t>(r.value().begin(), r.value().end()),
+        pkey.get());
 
     REQUIRE(s.has_value());
 
