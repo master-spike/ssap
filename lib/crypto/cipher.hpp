@@ -81,8 +81,9 @@ inline std::optional<std::vector<uint8_t, ossl_allocator<uint8_t>>>
 rsa_decrypt_block(std::span<const uint8_t> in, EVP_PKEY* key) {
 
     size_t max_input_length = EVP_PKEY_get_size(key);
-    if (max_input_length < in.size())
+    if (max_input_length < in.size()) {
         return std::nullopt;
+    }
 
     MAKE_OSSL_UNIQUE_PTR(EVP_PKEY_CTX, ctx, EVP_PKEY_CTX_new(key, nullptr));
 
