@@ -57,7 +57,7 @@ public:
     using size_type = size_t;
     using difference_type = ptrdiff_t;
 
-    constexpr pointer allocate(size_type n) {
+    [[nodiscard]] constexpr pointer allocate(size_type n) {
         void_pointer p = OPENSSL_malloc(n * sizeof(T));
         return reinterpret_cast<pointer>(p);
     }
