@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <memory>
 #include <type_traits>
 
@@ -68,6 +69,9 @@ public:
     }
 
     [[nodiscard]] constexpr pointer allocate(size_type n) {
+        if (std::numeric_limits<size_type>::max() / sizeof(T) < n) {
+            throw std::bad_alloc();
+        }
         void_pointer p = OPENSSL_malloc(n * sizeof(T));
         if (!p) {
             throw std::bad_alloc();
@@ -80,12 +84,12 @@ public:
     }
 
     template <typename U>
-    bool operator==(ossl_allocator<U> const& other) const noexcept {
+    constexpr bool operator==(ossl_allocator<U> const&) const noexcept {
         return true;
     }
 
     template <typename U>
-    bool operator!=(ossl_allocator<U> const& other) const noexcept {
+    constexpr bool operator!=(ossl_allocator<U> const&) const noexcept {
         return false;
     }
 };
