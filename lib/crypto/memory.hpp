@@ -57,6 +57,9 @@ public:
     using size_type = size_t;
     using difference_type = ptrdiff_t;
 
+    ossl_allocator() noexcept {
+    }
+
     template <typename U>
     ossl_allocator(ossl_allocator<U> const& other) noexcept {
     }
