@@ -57,13 +57,33 @@ public:
     using size_type = size_t;
     using difference_type = ptrdiff_t;
 
-    [[nodiscard]] constexpr pointer allocate(size_type n) {
-        void_pointer p = OPENSSL_malloc(n * sizeof(T));
-        return reinterpret_cast<pointer>(p);
+    template <typename U>
+    ossl_allocator(ossl_allocator<U> const& other) noexcept {
+    }
+    template <typename U>
+    ossl_allocator operator=(ossl_allocator<U> const& other) noexcept {
     }
 
-    constexpr void deallocate(pointer p, [[maybe_unused]] size_type n) {
+    [[nodiscard]] constexpr pointer allocate(size_type n) {
+        void_pointer p = OPENSSL_malloc(n * sizeof(T));
+        if (!p) {
+            throw std::bad_alloc();
+        }
+        return static_cast<pointer>(p);
+    }
+
+    constexpr void deallocate(pointer p, size_type) noexcept {
         OPENSSL_free(p);
+    }
+
+    template <typename U>
+    bool operator==(ossl_allocator<U> const& other) const noexcept {
+        return true;
+    }
+
+    template <typename U>
+    bool operator!=(ossl_allocator<U> const& other) const noexcept {
+        return false;
     }
 };
 
